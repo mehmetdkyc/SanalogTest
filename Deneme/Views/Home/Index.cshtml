@@ -1,0 +1,161 @@
+﻿@{
+    ViewData["Title"] = "Ana Sayfa";
+}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+<div class="container" style="text-align:center;">
+    <h4>Fatura İşlemleri</h4>
+    <form class="form-horizontal" action="">
+        <div class="form-group">
+            <label class="control-label col-md-4" for="dateFatura">Fatura Tarihini Seçiniz:</label>
+            <div class="col-md-6">
+                <input type="date" class="form-control" id="dateFatura" name="date">
+            </div>
+        </div>
+
+        <div class="form-group" id="productList">
+            <table class="table table-bordered productTable">
+                <thead>
+                    <tr>
+                        <th>Ürün İsmi</th>
+                        <th>Ürün Fiyatı</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="totalPrice">Toplam Fiyat:</label>
+            <label class="control-label" id="totalPrice">0</label>
+        </div>
+        <div class="form-group">
+            <div class="col-md-12">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">Ürün ekle</button>
+                <button type="button" class="btn btn-default saveButton">Kaydet</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Ürün ekleme modeli -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Ürün Bilgileri</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="control-label col-md-4" for="nameProduct">Ürün İsmi:</label>
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="nameProduct" name="nameProduct">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label col-md-4" for="priceProduct">Ürün Fiyatı:</label>
+                    <div class="col-md-6">
+                        <input type="number" class="form-control" id="priceProduct" name="priceProduct">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                <button type="button" class="btn btn-primary productAdd" data-dismiss="modal">Ekle</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var productsArray = [];
+    $('.productAdd').click(function () {
+        var name = document.getElementById('nameProduct').value;
+        var price = document.getElementById('priceProduct').value;
+
+        if (name == "") {
+            alert("Ürün adı boş bırakılamaz.");
+            return;
+        }
+        if (price == "") {
+            alert("Ürün fiyatı boş bırakılamaz.");
+            return;
+        }
+        addRow(name, price);
+    });
+    function addRow(n, p) {
+
+        $('.productTable > tbody:last-child').append('<tr><td>' + n + '</td><td>' + p + '</td></tr>');
+        calculateTotal();
+    }
+    function calculateTotal() {
+        var a;
+        var totalCost = 0;
+        $(".productTable > tbody > tr").each(function () {
+            a = $(this).find("td").slice(1, 2).text();
+            if (a != "" || a!=" ") {
+                totalCost += parseInt(a);
+            }
+        });
+        document.getElementById("totalPrice").innerHTML = totalCost;
+    }
+    $('.saveButton').click(function () {
+        var date = $('#dateFatura').val();
+        var price = $('#totalPrice').text();
+
+        $(".productTable > tbody > tr").each(function () {
+            var allRow = {
+                ProductName: $(this).find('td').eq(0).text(),
+                ProductPrice: $(this).find('td').eq(1).text(),
+            };
+            productsArray.push(allRow);
+        });
+        if (date == "") {
+            alert("Lütfen Tarih Belirleyiniz.");
+            return;
+        }
+        if (productsArray.length == 0) {
+            alert("Ürün eklemelisiniz.");
+            return;
+        }
+        let parameter = {
+            productlist: productsArray,
+            date1: date,
+            price1: price
+        };
+
+        console.log(parameter);
+        $.post(
+            '/Home/CreateBill', {
+            productlist: productsArray,
+            date1: date,
+            price1: price
+        
+        });
+        @*$.ajax({
+            url: '/Home/CreateBill',
+            enctype: 'multipart/form-data',
+            processData: false,
+            datatype: 'text',
+            contentType: 'application/json; charset=utf-8',
+            type: "POST",
+            data: JSON.stringify(parameter),
+            success: function (result) {
+                if (result) {
+                    alert("Başarılı");
+                } else {
+                    alert("Hata");
+                }
+            }
+        });*@
+
+    });
+
+</script>
+
