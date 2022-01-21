@@ -1,4 +1,4 @@
-# SanalogTest
+# SanalogiTest
 
 ASP.Net Core Mvc yapısını kullanarak istediğiniz maddeleri adım adım yaptım. Front kısmında bootstrap kullandım.
 
